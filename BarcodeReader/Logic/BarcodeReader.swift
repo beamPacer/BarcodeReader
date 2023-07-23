@@ -9,12 +9,6 @@ import Foundation
 import AppKit
 import Vision
 
-import AppKit
-import Vision
-
-import AppKit
-import Vision
-
 class BarcodeReader {
 	func readBarcode(from image: NSImage, completion: @escaping (Result<String, Error>) -> Void) {
 		guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
