@@ -6,12 +6,20 @@
 //
 
 import Foundation
+import SwiftUI
 import AppKit
 
 class ImageLoader: ObservableObject {
 	@Published var image: NSImage?
 
+	@MainActor
 	func load(from url: URL) {
-		// implement the image loading from file URL here
+		guard let image = NSImage(contentsOf: url) else {
+			print("Unable to load image from URL: \(url)")
+			return
+		}
+
+		self.image = image
 	}
 }
+

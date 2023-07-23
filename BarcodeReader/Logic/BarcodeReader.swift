@@ -10,7 +10,7 @@ import AppKit
 import Vision
 
 class BarcodeReader {
-	func readBarcode(from image: NSImage, completion: @escaping (Result<String, Error>) -> Void) {
+	func readBarcode(from image: NSImage, completion: @escaping (Result<[String], Error>) -> Void) {
 		guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
 			completion(.failure(NSError(domain: "ImageProcessing", code: 100, userInfo: [NSLocalizedDescriptionKey: "Unable to create CGImage from input image."])))
 			return
@@ -20,7 +20,7 @@ class BarcodeReader {
 			if let error = error {
 				completion(.failure(error))
 			} else {
-				completion(.success(self?.processClassification(request: request) ?? "No barcode detected"))
+				completion(.success(self?.processClassification(request: request) ?? []))
 			}
 		}
 
@@ -33,18 +33,20 @@ class BarcodeReader {
 		}
 	}
 
-	func processClassification(request: VNRequest) -> String {
-		guard let results = request.results else {
-			return "Unable to classify image."
+	func processClassification(request: VNRequest) -> [String] {
+		guard
+			let results = request.results,
+			let classifications = results as? [VNBarcodeObservation]
+		else {
+			return []
 		}
 
-		let classifications = results as! [VNBarcodeObservation]
-
 		if classifications.isEmpty {
-			return "No barcode detected"
+			return []
 		} else {
-			let firstBarcode = classifications.first!
-			return "\(firstBarcode.symbology.rawValue): \(firstBarcode.payloadStringValue ?? "")"
+			return classifications.compactMap {
+				$0.payloadStringValue
+			}
 		}
 	}
 }
